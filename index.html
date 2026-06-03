@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SICK – Formulário de Cadastro de Serviços NF</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #d0cfc8;
+    --border-strong: #999890;
+    --text: #1a1916;
+    --text-muted: #6b6a62;
+    --accent: #005aff;
+    --accent-light: #DFE1E6;
+    --accent-dark: #000a37;
+    --ok: #1a7a3e;
+    --ok-light: #edf7f1;
+    --warn: #c97a00;
+    --info: #1a4a7a;
+    --info-light: #edf3fb;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--text);
+    color: #fff;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo-area { display: flex; align-items: center; gap: 16px; }
+  .logo-box {
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 18px;
+    padding: 4px 10px;
+    letter-spacing: 2px;
+  }
+  .header-title { font-size: 13px; color: rgba(255,255,255,0.65); font-weight: 300; letter-spacing: 0.5px; }
+  .header-badge {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.8);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    letter-spacing: 1px;
+  }
+
+  /* LAYOUT */
+  .container { max-width: 900px; margin: 0 auto; padding: 32px 24px 80px; }
+
+  .page-title {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .page-heading {
+    font-size: 26px;
+    font-weight: 300;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    font-weight: 300;
+  }
+
+  /* STEPS */
+  .steps-nav {
+    display: flex;
+    gap: 0;
+    margin-bottom: 32px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .step-btn {
+    flex: 1;
+    padding: 12px 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-right: 1px solid var(--border);
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .step-btn:last-child { border-right: none; }
+  .step-btn.active { background: var(--text); color: #fff; }
+  .step-btn.done { background: var(--ok-light); color: var(--ok); }
+  .step-num { display: block; font-size: 18px; font-weight: 600; margin-bottom: 2px; }
+
+  /* SECTION CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fafaf8;
+  }
+  .card-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-light);
+    border: 1px solid #7e878e;
+    padding: 2px 7px;
+    min-width: 30px;
+    text-align: center;
+  }
+  .card-label { font-size: 13px; font-weight: 600; color: var(--text); }
+  .card-sub { font-size: 12px; color: var(--text-muted); font-weight: 300; }
+  .card-body { padding: 20px; }
+
+  /* FORM ELEMENTS */
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
+  
+  input[type=text], input[type=number], input[type=email], select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+    border-radius: 0;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--text); background: #fff; }
+  input:read-only { background: #f0efe9; color: var(--text-muted); cursor: default; }
+  
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; color: var(--text-muted); font-size: 12px;
+  }
+  .select-wrap select { padding-right: 32px; cursor: pointer; }
+
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-opt {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s;
+    background: var(--bg);
+    user-select: none;
+  }
+  .radio-opt:hover { border-color: var(--text); }
+  .radio-opt.selected { border-color: var(--text); background: var(--text); color: #fff; }
+  .radio-opt input { display: none; }
+
+  /* AUTOCOMPLETE */
+  .autocomplete-wrap { position: relative; }
+  .autocomplete-dropdown {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: #fff; border: 1px solid var(--text);
+    border-top: none; max-height: 200px; overflow-y: auto;
+    z-index: 200; display: none;
+  }
+  .autocomplete-dropdown.open { display: block; }
+  .autocomplete-item {
+    padding: 8px 12px; cursor: pointer; font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  .autocomplete-item:hover, .autocomplete-item.focused { background: var(--info-light); }
+  .autocomplete-item strong { color: var(--accent); }
+
+  /* AUTO-FILLED GRID */
+  .auto-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .auto-field { }
+  .auto-field.full { grid-column: 1/-1; }
+  .auto-value {
+    padding: 10px 12px;
+    background: var(--info-light);
+    border: 1px solid #c5d8f0;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--info);
+    min-height: 38px;
+    display: flex; align-items: center;
+    word-break: break-word;
+  }
+  .auto-value.empty { color: var(--border-strong); font-style: italic; font-family: var(--sans); font-size: 12px; }
+
+  /* RETENCAO TABLE */
+  .ret-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .ret-chip {
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 13px;
+    text-align: center;
+    border: 1px dashed var(--border);
+    color: var(--text-muted);
+    background: #fafaf8;
+  }
+  .ret-chip.has-val { border-color: #c5d8f0; background: var(--info-light); color: var(--info); border-style: solid; }
+  .ret-chip.na { border-color: var(--border); color: var(--text-muted); }
+
+  /* SERVICE SELECT LIST */
+  .service-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); max-height: 380px; overflow-y: auto; }
+  .service-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .service-item:last-child { border-bottom: none; }
+  .service-item:hover { background: #f5f4f0; }
+  .service-item.selected { background: var(--text); color: #fff; }
+  .service-item.selected .service-detail { color: rgba(255,255,255,0.65); }
+  .service-name { font-size: 13px; font-weight: 600; white-space: nowrap; min-width: 180px; max-width: 220px; }
+  .service-detail { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+  .service-check { min-width: 16px; margin-top: 2px; }
+
+  .search-filter {
+    padding: 10px 12px;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+    background: #fafaf8;
+    font-size: 13px;
+  }
+  .search-filter:focus { outline: none; background: #fff; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 12px 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-secondary { background: var(--text); color: #fff; }
+  .btn-secondary:hover { background: #333; }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--text); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .actions { display: flex; gap: 12px; align-items: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border); }
+
+  /* STEP PANELS */
+  .step-panel { display: none; }
+  .step-panel.active { display: block; }
+
+  /* REVIEW */
+  .review-section { margin-bottom: 24px; }
+  .review-title { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+  .review-row { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .review-key { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .review-val { font-size: 13px; font-weight: 600; color: var(--text); word-break: break-word; }
+  .review-val.accent { color: var(--accent); font-family: var(--mono); }
+
+  /* SUCCESS */
+  .success-box {
+    text-align: center; padding: 48px 32px;
+    border: 1px solid var(--ok);
+    background: var(--ok-light);
+  }
+  .success-icon { font-size: 48px; margin-bottom: 16px; }
+  .success-title { font-size: 20px; font-weight: 300; margin-bottom: 8px; }
+  .success-sub { font-size: 13px; color: var(--text-muted); }
+
+  /* ALERT */
+  .alert {
+    padding: 12px 16px; border-left: 3px solid;
+    font-size: 13px; margin-bottom: 16px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .alert-warn { border-color: var(--warn); background: #fff8e6; color: #7a4c00; }
+  .alert-info { border-color: var(--info); background: var(--info-light); color: var(--info); }
+
+  /* INSS note */
+  .inss-note { font-size: 11px; color: var(--warn); margin-top: 6px; }
+
+  /* ISS highlight */
+  .iss-highlight {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-light);
+    border: 1px solid #7e878e;
+    padding: 10px 16px;
+    display: inline-block;
+  }
+
+  .field-group { margin-bottom: 16px; }
+  .field-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 300; }
+
+  @media print {
+    header, .steps-nav, .actions, .search-filter, .btn { display: none !important; }
+    .step-panel { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <div class="logo-box">SICK</div>
+    <span class="header-title">Sistema de Cadastro de Serviços · Emissão de NF</span>
+  </div>
+ 
+</header>
+
+<div class="container">
+  <div class="page-title">Equipe de Cadastro</div>
+  <h1 class="page-heading">Formulário de Cadastro de Serviço</h1>
+  <p class="page-sub">Preencha as etapas abaixo para gerar o arquivo PDF de cadastro sem erros de NF.</p>
+
+  <div class="steps-nav">
+    <button class="step-btn active" data-step="1" onclick="goStep(1)">
+      <span class="step-num">01</span>Serviço
+    </button>
+    <button class="step-btn" data-step="2" onclick="goStep(2)">
+      <span class="step-num">02</span>Execução
+    </button>
+    <button class="step-btn" data-step="3" onclick="goStep(3)">
+      <span class="step-num">03</span>Local
+    </button>
+    <button class="step-btn" data-step="4" onclick="goStep(4)">
+      <span class="step-num">04</span>Valor
+    </button>
+    <button class="step-btn" data-step="5" onclick="goStep(5)">
+      <span class="step-num">05</span>Revisão
+    </button>
+  </div>
+
+  <!-- STEP 1: Service Selection -->
+  <div class="step-panel active" id="step-1">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">01</span>
+        <div>
+          <div class="card-label">Tipo de Serviço</div>
+          <div class="card-sub">Selecione o serviço que será prestado ao cliente</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+          <label>Filtrar serviço</label>
+          <input class="search-filter" type="text" id="service-search" placeholder="Digite para filtrar..." oninput="filterServices(this.value)" style="border:1px solid var(--border);border-radius:0;padding:10px 12px;">
+        </div>
+        <div class="service-list" id="service-list"></div>
+      </div>
+    </div>
+
+    <!-- Auto-filled details -->
+    <div class="card" id="auto-detail-card" style="display:none">
+      <div class="card-header">
+        <span class="card-num" style="background:#edf3fb;color:#1a4a7a;border-color:#c5d8f0">↳</span>
+        <div>
+          <div class="card-label">Dados Preenchidos Automaticamente</div>
+          <div class="card-sub">Aba Detalhe – conforme serviço selecionado</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="auto-grid">
+          <div class="auto-field">
+            <label>Código Serviço LC 116/03</label>
+            <div class="auto-value" id="av-codLC">–</div>
+          </div>
+          <div class="auto-field">
+            <label>NBS</label>
+            <div class="auto-value" id="av-nbs">–</div>
+          </div>
+          <div class="auto-field">
+            <label>INDOP</label>
+            <div class="auto-value" id="av-indop">–</div>
+          </div>
+          <div class="auto-field">
+            <label>Código Material</label>
+            <div class="auto-value" id="av-codMat">–</div>
+          </div>
+          <div class="auto-field">
+            <label>NCM-SAP</label>
+            <div class="auto-value" id="av-ncm">–</div>
+          </div>
+          <div class="auto-field">
+            <label>Divisão / Hierarquia</label>
+            <div class="auto-value" id="av-divisao">–</div>
+          </div>
+          <div class="auto-field full">
+            <label>Descrição LC 116/03</label>
+            <div class="auto-value" id="av-descLC" style="font-family:var(--sans);font-size:13px;">–</div>
+          </div>
+          <div class="auto-field full">
+            <label>Descrição Técnica do Serviço</label>
+            <div class="auto-value" id="av-detalhe" style="font-family:var(--sans);font-size:13px;line-height:1.5;">–</div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <label>ISS Aplicável</label>
+          <span class="iss-highlight" id="av-iss">–</span>
+        </div>
+
+        <div style="margin-top:20px;">
+          <label>Retenções na Fonte</label>
+          <div class="ret-row">
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">IRRF</div>
+              <div class="ret-chip" id="av-irrf">–</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">CSRF</div>
+              <div class="ret-chip" id="av-csrf">–</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">INSS</div>
+              <div class="ret-chip" id="av-inss">–</div>
+            </div>
+          </div>
+          <div class="inss-note" id="inss-note" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" onclick="goStep(2)" id="btn-next-1" disabled>Próximo →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Execução -->
+  <div class="step-panel" id="step-2">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">02</span>
+        <div>
+          <div class="card-label">Divisão Responsável</div>
+          <div class="card-sub">Confirme a divisão preenchida automaticamente</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+          <label>Divisão / Hierarquia</label>
+          <div class="auto-value" id="show-divisao" style="font-family:var(--mono);">–</div>
+          <p class="field-hint">Preenchido automaticamente conforme serviço selecionado na etapa 1.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">03</span>
+        <div>
+          <div class="card-label">Forma de Prestação</div>
+          <div class="card-sub">O serviço será prestado de forma presencial ou remota?</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-info" id="forma-alert" style="display:none">
+          ℹ Este tipo de serviço é configurado para execução <strong id="forma-restricao"></strong>.
+        </div>
+        <div class="radio-group" id="forma-options"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">05</span>
+        <div>
+          <div class="card-label">Frequência do Serviço</div>
+          <div class="card-sub">O serviço será contínuo/recorrente ou pontual?</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="radio-group" id="freq-options">
+          <label class="radio-opt" onclick="selectFreq(this, 'Recorrente')">
+            <input type="radio" name="freq" value="Recorrente">
+            🔁 Recorrente (mensal ou periódico)
+          </label>
+          <label class="radio-opt" onclick="selectFreq(this, 'Pontual')">
+            <input type="radio" name="freq" value="Pontual">
+            ✦ Pontual (uma única vez)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="goStep(1)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(3)" id="btn-next-2" disabled>Próximo →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Local -->
+  <div class="step-panel" id="step-3">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">04</span>
+        <div>
+          <div class="card-label">Local de Prestação do Serviço</div>
+          <div class="card-sub">Informe o município e estado onde o serviço é efetivamente prestado</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+          <label>Buscar Município / UF (IBGE)</label>
+          <div class="autocomplete-wrap">
+            <input type="text" id="mun-search" placeholder="Ex: São Paulo, Campinas, Belo Horizonte..." oninput="searchMun(this.value)" onblur="setTimeout(()=>closeMun(),200)" autocomplete="off">
+            <div class="autocomplete-dropdown" id="mun-dropdown"></div>
+          </div>
+          <p class="field-hint">Tabela IBGE DTB_Municípios – 5.571 municípios disponíveis.</p>
+        </div>
+        <div class="field-group" id="mun-selected-display" style="display:none">
+          <label>Município / UF Selecionado</label>
+          <div class="auto-value" style="font-family:var(--mono);font-size:15px;" id="mun-selected-val">–</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="goStep(2)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(4)" id="btn-next-3" disabled>Próximo →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Valor -->
+  <div class="step-panel" id="step-4">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">06</span>
+        <div>
+          <div class="card-label">Valor do Serviço</div>
+          <div class="card-sub">Informe o valor sem impostos</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+          <label>Valor (R$) – sem impostos</label>
+          <input type="number" id="valor" placeholder="Ex: 1500.00" step="0.01" min="0" oninput="updateValor()">
+          <p class="field-hint">Campo livre. Valor base do serviço antes da incidência de impostos.</p>
+        </div>
+        <div id="calc-area" style="display:none;margin-top:16px;">
+          <div class="auto-grid">
+            <div class="auto-field">
+              <label>ISS Estimado</label>
+              <div class="auto-value" id="calc-iss">–</div>
+            </div>
+            <div class="auto-field">
+              <label>IRRF Estimado</label>
+              <div class="auto-value" id="calc-irrf">–</div>
+            </div>
+            <div class="auto-field">
+              <label>CSRF Estimado</label>
+              <div class="auto-value" id="calc-csrf">–</div>
+            </div>
+            <div class="auto-field">
+              <label>Valor + ISS</label>
+              <div class="auto-value" id="calc-total" style="font-size:16px;font-weight:600;color:var(--ok);">–</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">✉</span>
+        <div>
+          <div class="card-label">Dados para Envio (Opcional)</div>
+          <div class="card-sub">Preencha para envio do PDF por e-mail</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="auto-grid">
+          <div class="auto-field">
+            <div class="field-group">
+              <label>Nome do Solicitante</label>
+              <input type="text" id="solicitante" placeholder="Nome completo">
+            </div>
+          </div>
+          <div class="auto-field">
+            <div class="field-group">
+              <label>E-mail</label>
+              <input type="email" id="email" placeholder="email@empresa.com">
+            </div>
+          </div>
+          <div class="auto-field full">
+            <div class="field-group">
+              <label>Nome do Cliente</label>
+              <input type="text" id="cliente" placeholder="Razão social ou nome do cliente">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="goStep(3)">← Voltar</button>
+      <button class="btn btn-primary" onclick="goStep(5)">Revisar →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Review & PDF -->
+  <div class="step-panel" id="step-5">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num" style="background:#edf7f1;color:#1a7a3e;border-color:#a8ddb8">✓</span>
+        <div>
+          <div class="card-label">Revisão Final</div>
+          <div class="card-sub">Confira todos os dados antes de gerar o PDF</div>
+        </div>
+      </div>
+      <div class="card-body" id="review-content">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="goStep(4)">← Editar</button>
+      <button class="btn btn-secondary" onclick="gerarPDF()">⬇ Baixar PDF</button>
+      <button class="btn btn-primary" onclick="gerarPDFEmail()" id="btn-email">✉ Gerar + Abrir Email</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== DATA =====
+const SERVICES = [{"nome": "INVENTÁRIO", "detalhe": "Levantamos quais equipamentos existem na planta do cliente, seus dados técnicos, relação de sistemas de segurança, localização na planta do cliente", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "17.09", "nbs": "1.1404.49.00", "indop": "100301", "codMaterial": "1612616", "ncmSap": "SERV.17.09.00", "divisao": "30AR0598CONSUL", "iss": "3.0%", "descLC": "17.09 – Perícias, laudos, exames técnicos e análises técnicas.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "AVALIAÇÃO DE PLANTA", "detalhe": "Estimativa de investimento para apoiar a gestão com informações para previsão de investimento", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "17.09", "nbs": "1.1404.49.00", "indop": "100301", "codMaterial": "1682472", "ncmSap": "SERV.17.09.00", "divisao": "30AR0598CONSUL", "iss": "3.0%", "descLC": "17.09 – Perícias, laudos, exames técnicos e análises técnicas.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "PROJETO CONCEITUAL DE SEGURANÇA", "detalhe": "Avaliação da apreciação de risco OEM Revisão dos esquemas elétricos do OEM para determinar os locais de interface do sistema de segurança - Projeto conceitual de medidas de proteção - Conceito de funções de segurança-Matriz de interação com lista de funções de segurança", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "7.03", "nbs": "1.1403.10.00", "indop": "100301", "codMaterial": "1612713", "ncmSap": "SERV.07.03.00", "divisao": "30AR0598CONSUL", "iss": "3.0%", "descLC": "7.03 – Elaboração de planos diretores, estudos de viabilidade, estudos organizacionais e outros, relacionados com obras e serviços de engenharia; elaboração de anteprojetos, projetos básicos e projetos executivos para trabalhos de engenharia.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "MEDIÇÃO DO TEMPO TOTAL DE PARADA", "detalhe": "Medição do tempo de parada da máquina para funções de segurança relevantes (após acionamento destas).\nExecução da medição do tempo de parada.\nNecessário acionar cada dispositivo de segurança para aferir quanto tmepo uma máquina para totalmente.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "17.09", "nbs": "1.1404.49.00", "indop": "100301", "codMaterial": "1681946", "ncmSap": "SERV.17.09.00", "divisao": "30AR0190INSPEC", "iss": "3.0%", "descLC": "17.09 – Perícias, laudos, exames técnicos e análises técnicas.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "PROJETO DO SOFTWARE DE SEGURANÇA", "detalhe": "Criar configuração de hardware SRASW (segurança de máquina)\nCriar programa de função SRASW (segurança de máquina)", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "1.01", "nbs": "1.1502.20.00", "indop": "100301", "codMaterial": "", "ncmSap": "", "divisao": "", "iss": "2.0%", "descLC": "1.01 – Análise e desenvolvimento de sistemas.", "irrf": "Preciso saber se Licenciamento ou Desenvolvimento", "csrf": "Preciso saber se Licenciamento ou Desenvolvimento", "inss": "N/A"}, {"nome": "PROEJTO EXECUTIVO - ELÉTRICA / MECÂNCIA / HIDRÁULICA / PNEUMÁTICA", "detalhe": "Elaboração e atualização de projetos técnicos de sistemas de segurança e automação, incluindo desenvolvimento de esquemas elétricos e definição de interfaces com soluções SICK. Especificação de componentes elétricos, mecânicos e sistemas de proteção, com preparação de listas técnicas e documentação de engenharia. Fabricação de proteções, equipamentos mecânicos e painéis de controle conforme projeto.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "7.03", "nbs": "1.1403.10.00", "indop": "100301", "codMaterial": "1612713", "ncmSap": "SERV.07.03.00", "divisao": "30AR0598CONSUL", "iss": "3.0%", "descLC": "7.03 – Elaboração de planos diretores, estudos de viabilidade, estudos organizacionais e outros, relacionados com obras e serviços de engenharia; elaboração de anteprojetos, projetos básicos e projetos executivos para trabalhos de engenharia.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "INSTALAÇÃO", "detalhe": "Instalação e integração de sistemas de segurança e automação em campo, incluindo montagem de fiação, sensores, câmeras, dispositivos de comando e painéis elétricos.                    Instalação de componentes elétricos, mecânicos e hidráulicos conforme especificações técnicas, com alinhamento, configuração e parametrização dos dispositivos.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.06", "nbs": "1.2003.21.90", "indop": "50101", "codMaterial": "1608206", "ncmSap": "SERV.14.06.00", "divisao": "20BI9082INSCOM", "iss": "3.0%", "descLC": "14.06 – Instalação e montagem de aparelhos, máquinas e equipamentos, inclusive montagem industrial, prestados ao usuário final, exclusivamente com material por ele fornecido.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "COMISSIONAMENTO", "detalhe": "Start-up' dos sistemas de segurança implementados (ou memso apenas alterados) pela SICK - geralmente quando o serviço engloba alteração nas instalações/maquinário do cliente\nStart-up de sistemas de visão 2D/3D e soluções com sensores/scanners (AP/IA/SE) pela SICK\nAcompanhamento do reinício do processo do cliente após os serviços que promoveram alteração no projeto original.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1614997", "ncmSap": "SERV.14.02.00", "divisao": "10BG9091FIELDS", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "VALIDAÇÃO DAS FUNÇÕES DE SEGURANÇA", "detalhe": "Instalação de componentes elétricos, mecânicos e hidráulicos conforme especificações técnicas, com alinhamento, configuração e parametrização dos dispositivos.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "17.09", "nbs": "1.1404.49.00", "indop": "100301", "codMaterial": "1682444", "ncmSap": "SERV.17.09.00", "divisao": "30AR0598CONSUL", "iss": "3.0%", "descLC": "17.09 – Perícias, laudos, exames técnicos e análises técnicas.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "TREINAMENTO", "detalhe": "Treinamento técnico em segurança de máquinas, incluindo conceitos de identificação e mitigação de riscos, legislação aplicável (NR12) e normas técnicas nacionais e internacionais. Abordagem de dispositivos e sistemas de proteção, metodologias de avaliação de risco e princípios de projeto de controle de segurança conforme normas ISO. Atividades práticas, incluindo aplicação de conceitos, validação de funções de segurança e operação e parametrização de soluções SICK.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "8.02", "nbs": "1.2205.19.00", "indop": "30101", "codMaterial": "1610074", "ncmSap": "SERV.08.02.00", "divisao": "30AR0397TRAIN", "iss": "3.5%", "descLC": "8.02 – Instrução, treinamento, orientação pedagógica e educacional, avaliação de conhecimentos de qualquer natureza.", "irrf": "1.500%", "csrf": "4.65%", "inss": "Precisamos criar 2 PN para treinamento remeto e presencial INSS somente para os casos de prestação precencial"}, {"nome": "MANUTENÇÃO DE PRODUTOS SICK", "detalhe": "Suporte ao comissionamento, diagnóstico de falhas e integração com PLC OEM, incluindo adaptação de sinais e interfaces com sistemas SICK e de terceiros.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.01", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1689027", "ncmSap": "SERV.14.01.00", "divisao": "20BI9091FIELDS", "iss": "4.0%", "descLC": "14.01 – Lubrificação, limpeza, lustração, revisão, carga e recarga, conserto, restauração, blindagem, manutenção e conservação de máquinas, veículos, aparelhos, equipamentos, motores, elevadores ou de qualquer objeto (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).", "irrf": "N/A", "csrf": "4.65%", "inss": "N/A Verificar"}, {"nome": "ELABORAÇÃO / REVISÃO DE DOCUMENTAÇÃO CONF. NR", "detalhe": "Revisão de documentação do cliente, atualizado-o conforme exigência da norma regulamentadora vigente (aplica-se mais a manuais de máquinas)", "formaOpcoes": ["Remota"], "codLC": "17.09", "nbs": "1.1404.49.00", "indop": "100301", "codMaterial": "1680230", "ncmSap": "SERV.14.02.00", "divisao": "30AR0583ENGIN", "iss": "3.0%", "descLC": "17.09 – Perícias, laudos, exames técnicos e análises técnicas.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "LICENÇAS DE SOFTWARE AP / IA", "detalhe": "Fornecimento de licenças de software que podem ser baixadas a partir do site da SICK e acessadas por meio de chaves de ativação enviadas por e-mail\nFornecimento de licenças de software por meio de dongle físico (Ex. MicroSD card)", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "1.01", "nbs": "1.1502.20.00", "indop": "100301", "codMaterial": "", "ncmSap": "", "divisao": "", "iss": "2.0%", "descLC": "1.01 – Análise e desenvolvimento de sistemas.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A"}, {"nome": "DESENVOLVIMENTO DE SOFTWARE AP", "detalhe": "Desenvolvimento de software para determinadas aplicações/soluções com uso de hardware SICK (in loco ou remoto)", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "1.01", "nbs": "1.1502.20.00", "indop": "100301", "codMaterial": "", "ncmSap": "", "divisao": "", "iss": "2.0%", "descLC": "1.01 – Análise e desenvolvimento de sistemas.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "SERVIÇOS DE MANUTENÇÃO E REPARO", "detalhe": "Execução de manutenção de produtos in loco (preventiva).\nRecebimento de materiais danificados ou que precisem de ferramentas especiais para manutneção preventiva/corretiva\nAtualização de firmware, se necessário e quando requisitado pelo cliente (in loco ou na SICK)", "formaOpcoes": ["Remota"], "codLC": "14.01", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1619378", "ncmSap": "SERV.14.01.01", "divisao": "20BI9091FIELDS", "iss": "4.0%", "descLC": "14.01 – Lubrificação, limpeza, lustração, revisão, carga e recarga, conserto, restauração, blindagem, manutenção e conservação de máquinas, veículos, aparelhos, equipamentos, motores, elevadores ou de qualquer objeto (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).", "irrf": "N/A", "csrf": "4.65%", "inss": "N/A Verificar"}, {"nome": "ASSISTÊNCIA TÉCNICA", "detalhe": "Análise/verificação de funcionamento de hardware SICK (in loco ou remoto)\nConfiguração/parametrização ou ajustes de Hardware/software SICK (in loco ou remoto)\nAtualização de Firmware de produtos SICK", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1614997", "ncmSap": "SERV.14.02.00", "divisao": "10BG9091FIELDS", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "PROJETO CONCEITUAL AP / IA / SE", "detalhe": "Projeto conceitual para verificar melhor posicionamento para instalações de sensores/ câmeras ou scanners, além de verificar possíveis conflitos com o ambiente onde serão instalados", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "7.03", "nbs": "1.1403.10.00", "indop": "100301", "codMaterial": "1612713", "ncmSap": "SERV.07.03.00", "divisao": "30AR0598CONSUL", "iss": "3.0%", "descLC": "7.03 – Elaboração de planos diretores, estudos de viabilidade, estudos organizacionais e outros, relacionados com obras e serviços de engenharia; elaboração de anteprojetos, projetos básicos e projetos executivos para trabalhos de engenharia.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "ACOMPANHAMENTO DE INSTALAÇÂO E COMISSIONAMENTO", "detalhe": "Acompanhamento de Start-up de sistemas de visão 2D/3D e soluções com sensores/scanners (AP/IA/SE) pela SICK - Quando esses serão feitos diretamente por OEMs ou terceiros", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1614997", "ncmSap": "SERV.14.02.00", "divisao": "10BG9091FIELDS", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "TREINAMENTO", "detalhe": "Treinamento técnico em segurança de máquinas, incluindo conceitos de identificação e mitigação de riscos, legislação aplicável (NR12) e normas técnicas nacionais e internacionais. Abordagem de dispositivos e sistemas de proteção, metodologias de avaliação de risco e princípios de projeto de controle de segurança conforme normas ISO. Atividades práticas, incluindo aplicação de conceitos, validação de funções de segurança e operação e parametrização de soluções SICK.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "8.02", "nbs": "1.2205.19.00", "indop": "30101", "codMaterial": "1610078", "ncmSap": "SERV.08.02.00", "divisao": "20BI9097TRAIN", "iss": "3.5%", "descLC": "8.02 – Instrução, treinamento, orientação pedagógica e educacional, avaliação de conhecimentos de qualquer natureza.", "irrf": "1.500%", "csrf": "4.65%", "inss": "Precisamos criar 2 PN para treinamento remeto e presencial INSS somente para os casos de prestação precencial"}, {"nome": "INSTALAÇÃO", "detalhe": "Instalação e integração de sistemas de segurança e automação em campo, incluindo montagem de fiação, sensores, câmeras, dispositivos de comando e painéis elétricos.                    Instalação de componentes elétricos, mecânicos e hidráulicos conforme especificações técnicas, com alinhamento, configuração e parametrização dos dispositivos.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.06", "nbs": "1.2003.21.90", "indop": "50101", "codMaterial": "1611790", "ncmSap": "SERV.14.06.00", "divisao": "30AR0291INSCOM", "iss": "3.0%", "descLC": "14.06 – Instalação e montagem de aparelhos, máquinas e equipamentos, inclusive montagem industrial, prestados ao usuário final, exclusivamente com material por ele fornecido.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "INSTALAÇÃO", "detalhe": "Instalação e integração de sistemas de segurança e automação em campo, incluindo montagem de fiação, sensores, câmeras, dispositivos de comando e painéis elétricos.                    Instalação de componentes elétricos, mecânicos e hidráulicos conforme especificações técnicas, com alinhamento, configuração e parametrização dos dispositivos.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.06", "nbs": "1.2003.21.90", "indop": "50101", "codMaterial": "1611636", "ncmSap": "SERV.14.06.00", "divisao": "30AU9981INSCOM", "iss": "3.0%", "descLC": "14.06 – Instalação e montagem de aparelhos, máquinas e equipamentos, inclusive montagem industrial, prestados ao usuário final, exclusivamente com material por ele fornecido.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "MANUTENÇÃO DE PRODUTOS SICK", "detalhe": "Execução de manutenção de pordutos in loco (preventiva).\nRecebimento de materiais danificados ou que precisem de ferramentas especiais para manutneção preventiva/corretiva\nAtualização de firmware, se necessário e quando requisitado pelo cliente (in loco ou na SICK)", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.01", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1615837", "ncmSap": "SERV.14.01.00", "divisao": "30AU9981INSCOM", "iss": "4.0%", "descLC": "14.01 – Lubrificação, limpeza, lustração, revisão, carga e recarga, conserto, restauração, blindagem, manutenção e conservação de máquinas, veículos, aparelhos, equipamentos, motores, elevadores ou de qualquer objeto (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).", "irrf": "N/A", "csrf": "4.65%", "inss": "N/A Verificar"}, {"nome": "SERVIÇOS DE MANUTENÇÃO E REPARO", "detalhe": "Execução de manutenção de produtos in loco (preventiva).\nRecebimento de materiais danificados ou que precisem de ferramentas especiais para manutneção preventiva/corretiva\nAtualização de firmware, se necessário e quando requisitado pelo cliente (in loco ou na SICK)", "formaOpcoes": ["Remota"], "codLC": "14.01", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1619243", "ncmSap": "SERV.14.01.01", "divisao": "30AU9981INSCOM", "iss": "4.0%", "descLC": "14.01 – Lubrificação, limpeza, lustração, revisão, carga e recarga, conserto, restauração, blindagem, manutenção e conservação de máquinas, veículos, aparelhos, equipamentos, motores, elevadores ou de qualquer objeto (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).", "irrf": "N/A", "csrf": "4.65%", "inss": "N/A Verificar"}, {"nome": "MANUTENÇÃO DE PRODUTOS SICK", "detalhe": "Execução de manutenção de pordutos in loco (preventiva).\nRecebimento de materiais danificados ou que precisem de ferramentas especiais para manutneção preventiva/corretiva\nAtualização de firmware, se necessário e quando requisitado pelo cliente (in loco ou na SICK)", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.01", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1619218", "ncmSap": "SERV.14.01.00", "divisao": "30AU9091FIELDS", "iss": "4.0%", "descLC": "14.01 – Lubrificação, limpeza, lustração, revisão, carga e recarga, conserto, restauração, blindagem, manutenção e conservação de máquinas, veículos, aparelhos, equipamentos, motores, elevadores ou de qualquer objeto (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).", "irrf": "N/A", "csrf": "4.65%", "inss": "N/A Verificar"}, {"nome": "MANUTENÇÃO DE PRODUTOS SICK", "detalhe": "Execução de manutenção de pordutos in loco (preventiva).\nRecebimento de materiais danificados ou que precisem de ferramentas especiais para manutneção preventiva/corretiva\nAtualização de firmware, se necessário e quando requisitado pelo cliente (in loco ou na SICK)", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.01", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1610069", "ncmSap": "SERV.14.01.00", "divisao": "20BI9082INSCOM", "iss": "4.0%", "descLC": "14.01 – Lubrificação, limpeza, lustração, revisão, carga e recarga, conserto, restauração, blindagem, manutenção e conservação de máquinas, veículos, aparelhos, equipamentos, motores, elevadores ou de qualquer objeto (exceto peças e partes empregadas, que ficam sujeitas ao ICMS).", "irrf": "N/A", "csrf": "4.65%", "inss": "N/A Verificar"}, {"nome": "ELABORAÇÃO / REVISÃO DE DOCUMENTAÇÃO CONF. NR", "detalhe": "Revisão de documentação do cliente, atualizado-o conforme exigência da norma regulamentadora vigente (aplica-se mais a manuais de máquinas)", "formaOpcoes": ["Remota"], "codLC": "17.09", "nbs": "1.1404.49.00", "indop": "100301", "codMaterial": "1612713", "ncmSap": "SERV.07.03.00", "divisao": "30AR0598CONSUL", "iss": "3.0%", "descLC": "17.09 – Perícias, laudos, exames técnicos e análises técnicas.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "APRECIAÇÃO DE RISCO", "detalhe": "Identificação de perigos e avaliação de riscos associados à operação da máquina, incluindo análise de riscos mecânicos, elétricos, ambientais e ergonômicos.\n\nDefinição dos limites da máquina, estimativa do nível de risco (PLr/Categoria) e avaliação das medidas de proteção existentes, com recomendação de melhorias.\n\nVerificação de plausibilidade dos riscos identificados, das medidas de mitigação e da efetividade da redução de risco aplicada.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "17.09", "nbs": "1.1404.49.00", "indop": "100301", "codMaterial": "1682450", "ncmSap": "SERV.17.09.00", "divisao": "30AR0598CONSUL", "iss": "3.0%", "descLC": "17.09 – Perícias, laudos, exames técnicos e análises técnicas.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "APRECIAÇÃO DE RISCO", "detalhe": "Identificação de perigos e avaliação de riscos associados à operação da máquina, incluindo análise de riscos mecânicos, elétricos, ambientais e ergonômicos.\n\nDefinição dos limites da máquina, estimativa do nível de risco (PLr/Categoria) e avaliação das medidas de proteção existentes, com recomendação de melhorias.\n\nVerificação de plausibilidade dos riscos identificados, das medidas de mitigação e da efetividade da redução de risco aplicada.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "17.09", "nbs": "1.1404.49.00", "indop": "100301", "codMaterial": "1613420", "ncmSap": "SERV.17.09.00", "divisao": "30AR0598PROJEC", "iss": "3.0%", "descLC": "17.09 – Perícias, laudos, exames técnicos e análises técnicas.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "APRECIAÇÃO DE RISCO", "detalhe": "Identificação de perigos e avaliação de riscos associados à operação da máquina, incluindo análise de riscos mecânicos, elétricos, ambientais e ergonômicos.\n\nDefinição dos limites da máquina, estimativa do nível de risco (PLr/Categoria) e avaliação das medidas de proteção existentes, com recomendação de melhorias.\n\nVerificação de plausibilidade dos riscos identificados, das medidas de mitigação e da efetividade da redução de risco aplicada.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "17.09", "nbs": "1.1404.49.00", "indop": "100301", "codMaterial": "1680230", "ncmSap": "SERV.14.02.00", "divisao": "30AR0583ENGIN", "iss": "3.0%", "descLC": "17.09 – Perícias, laudos, exames técnicos e análises técnicas.", "irrf": "1.500%", "csrf": "4.65%", "inss": "N/A"}, {"nome": "COMISSIONAMENTO", "detalhe": "Start-up' dos sistemas de segurança implementados (ou memso apenas alterados) pela SICK - geralmente quando o serviço engloba alteração nas instalações/maquinário do cliente\nStart-up de sistemas de visão 2D/3D e soluções com sensores/scanners (AP/IA/SE) pela SICK\nAcompanhamento do reinício do processo do cliente após os serviços que promoveram alteração no projeto original.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1613457", "ncmSap": "SERV.14.02.00", "divisao": "20BI9089TECSUP", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "COMISSIONAMENTO", "detalhe": "Start-up' dos sistemas de segurança implementados (ou memso apenas alterados) pela SICK - geralmente quando o serviço engloba alteração nas instalações/maquinário do cliente\nStart-up de sistemas de visão 2D/3D e soluções com sensores/scanners (AP/IA/SE) pela SICK\nAcompanhamento do reinício do processo do cliente após os serviços que promoveram alteração no projeto original.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1680230", "ncmSap": "SERV.14.02.00", "divisao": "30AR0583ENGIN", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "COMISSIONAMENTO", "detalhe": "Start-up' dos sistemas de segurança implementados (ou memso apenas alterados) pela SICK - geralmente quando o serviço engloba alteração nas instalações/maquinário do cliente\nStart-up de sistemas de visão 2D/3D e soluções com sensores/scanners (AP/IA/SE) pela SICK\nAcompanhamento do reinício do processo do cliente após os serviços que promoveram alteração no projeto original.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1614283", "ncmSap": "SERV.14.02.00", "divisao": "30AR9981CPMENG", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "COMISSIONAMENTO", "detalhe": "Start-up' dos sistemas de segurança implementados (ou memso apenas alterados) pela SICK - geralmente quando o serviço engloba alteração nas instalações/maquinário do cliente\nStart-up de sistemas de visão 2D/3D e soluções com sensores/scanners (AP/IA/SE) pela SICK\nAcompanhamento do reinício do processo do cliente após os serviços que promoveram alteração no projeto original.", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1613494", "ncmSap": "SERV.14.02.00", "divisao": "30AU9981INSCOM", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ASSISTÊNCIA TÉCNICA", "detalhe": "Análise/verificação de funcionamento de hardware SICK (in loco ou remoto)\nConfiguração/parametrização ou ajustes de Hardware/software SICK (in loco ou remoto)\nAtualização de Firmware de produtos SICK", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1613457", "ncmSap": "SERV.14.02.00", "divisao": "20BI9089TECSUP", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ASSISTÊNCIA TÉCNICA", "detalhe": "Análise/verificação de funcionamento de hardware SICK (in loco ou remoto)\nConfiguração/parametrização ou ajustes de Hardware/software SICK (in loco ou remoto)\nAtualização de Firmware de produtos SICK", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1619085", "ncmSap": "SERV.14.02.01", "divisao": "20BI9089TECSUP", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ASSISTÊNCIA TÉCNICA", "detalhe": "Análise/verificação de funcionamento de hardware SICK (in loco ou remoto)\nConfiguração/parametrização ou ajustes de Hardware/software SICK (in loco ou remoto)\nAtualização de Firmware de produtos SICK", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1618813", "ncmSap": "SERV.14.02.01", "divisao": "30AR0583ENGIN", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ASSISTÊNCIA TÉCNICA", "detalhe": "Análise/verificação de funcionamento de hardware SICK (in loco ou remoto)\nConfiguração/parametrização ou ajustes de Hardware/software SICK (in loco ou remoto)\nAtualização de Firmware de produtos SICK", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1680230", "ncmSap": "SERV.14.02.00", "divisao": "30AR0583ENGIN", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ASSISTÊNCIA TÉCNICA", "detalhe": "Análise/verificação de funcionamento de hardware SICK (in loco ou remoto)\nConfiguração/parametrização ou ajustes de Hardware/software SICK (in loco ou remoto)\nAtualização de Firmware de produtos SICK", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1618656", "ncmSap": "SERV.14.02.00", "divisao": "30AR0598CONSUL", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ASSISTÊNCIA TÉCNICA", "detalhe": "Análise/verificação de funcionamento de hardware SICK (in loco ou remoto)\nConfiguração/parametrização ou ajustes de Hardware/software SICK (in loco ou remoto)\nAtualização de Firmware de produtos SICK", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1614283", "ncmSap": "SERV.14.02.00", "divisao": "30AR9981CPMENG", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ASSISTÊNCIA TÉCNICA", "detalhe": "Análise/verificação de funcionamento de hardware SICK (in loco ou remoto)\nConfiguração/parametrização ou ajustes de Hardware/software SICK (in loco ou remoto)\nAtualização de Firmware de produtos SICK", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1613494", "ncmSap": "SERV.14.02.00", "divisao": "30AU9981INSCOM", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ASSISTÊNCIA TÉCNICA", "detalhe": "Análise/verificação de funcionamento de hardware SICK (in loco ou remoto)\nConfiguração/parametrização ou ajustes de Hardware/software SICK (in loco ou remoto)\nAtualização de Firmware de produtos SICK", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros", "Remota"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1619002", "ncmSap": "SERV.14.02.01", "divisao": "30AU9981INSCOM", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ACOMPANHAMENTO DE INSTALAÇÂO E COMISSIONAMENTO", "detalhe": "Acompanhamento de Start-up de sistemas de visão 2D/3D e soluções com sensores/scanners (AP/IA/SE) pela SICK - Quando esses serão feitos diretamente por OEMs ou terceiros", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1613457", "ncmSap": "SERV.14.02.00", "divisao": "20BI9089TECSUP", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ACOMPANHAMENTO DE INSTALAÇÂO E COMISSIONAMENTO", "detalhe": "Acompanhamento de Start-up de sistemas de visão 2D/3D e soluções com sensores/scanners (AP/IA/SE) pela SICK - Quando esses serão feitos diretamente por OEMs ou terceiros", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1680230", "ncmSap": "SERV.14.02.00", "divisao": "30AR0583ENGIN", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ACOMPANHAMENTO DE INSTALAÇÂO E COMISSIONAMENTO", "detalhe": "Acompanhamento de Start-up de sistemas de visão 2D/3D e soluções com sensores/scanners (AP/IA/SE) pela SICK - Quando esses serão feitos diretamente por OEMs ou terceiros", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1614283", "ncmSap": "SERV.14.02.00", "divisao": "30AR9981CPMENG", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}, {"nome": "ACOMPANHAMENTO DE INSTALAÇÂO E COMISSIONAMENTO", "detalhe": "Acompanhamento de Start-up de sistemas de visão 2D/3D e soluções com sensores/scanners (AP/IA/SE) pela SICK - Quando esses serão feitos diretamente por OEMs ou terceiros", "formaOpcoes": ["Presencial no Cliente", "Presencial em Terceiros"], "codLC": "14.02", "nbs": "1.2001.50.00", "indop": "50101", "codMaterial": "1613494", "ncmSap": "SERV.14.02.00", "divisao": "30AU9981INSCOM", "iss": "4.0%", "descLC": "14.02 – Assistência técnica.", "irrf": "N/A", "csrf": "N/A", "inss": "N/A Verificar"}];
+let MUNICIPIOS = [];
+
+async function carregarMunicipios() {
+  try {
+    const res = await fetch("https://servicodados.ibge.gov.br/api/v1/localidades/municipios");
+    const data = await res.json();
+
+    MUNICIPIOS = data.map(m => ({
+      municipio: m.nome,
+      uf: m.microrregiao.mesorregiao.UF.sigla,
+      codigoIBGE: m.id
+    }));
+
+    console.log("Municípios carregados:", MUNICIPIOS.length);
+
+  } catch (e) {
+    console.error("Erro ao carregar municípios IBGE", e);
+  }
+}
+// ===== STATE =====
+const state = {
+  selectedService: null,
+  forma: null,
+  freq: null,
+  municipio: null,
+  valor: null,
+  solicitante: '',
+  email: '',
+  cliente: '',
+};
+
+let filteredServices = [...SERVICES];
+let currentFocusMun = -1;
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  renderServiceList(SERVICES);
+});
+
+// ===== STEP NAVIGATION =====
+function goStep(n) {
+  // Validate
+  if (n > 1 && !state.selectedService) { alert('Selecione um serviço primeiro.'); return; }
+  if (n > 2 && (!state.forma || !state.freq)) { alert('Selecione a forma de prestação e frequência.'); return; }
+  if (n > 3 && !state.municipio) { alert('Selecione um município.'); return; }
+
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+
+  document.querySelectorAll('.step-btn').forEach(b => {
+    const s = parseInt(b.dataset.step);
+    b.classList.remove('active', 'done');
+    if (s === n) b.classList.add('active');
+    else if (s < n) b.classList.add('done');
+  });
+
+  if (n === 2) populateStep2();
+  if (n === 5) buildReview();
+}
+
+// ===== SERVICE LIST =====
+function renderServiceList(list) {
+  const el = document.getElementById('service-list');
+  el.innerHTML = list.map((s, i) => `
+    <div class="service-item" onclick="selectService(${SERVICES.indexOf(s)})" id="si-${SERVICES.indexOf(s)}">
+      <span class="service-check">${state.selectedService?.nome === s.nome ? '●' : '○'}</span>
+      <div>
+        <div class="service-name">${s.nome}</div>
+        <div class="service-detail">${s.detalhe.substring(0,90)}${s.detalhe.length > 90 ? '…' : ''}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterServices(q) {
+  const ql = q.toLowerCase();
+  const filtered = SERVICES.filter(s =>
+    s.nome.toLowerCase().includes(ql) || s.detalhe.toLowerCase().includes(ql)
+  );
+  renderServiceList(filtered);
+}
+
+function selectService(idx) {
+  const svc = SERVICES[idx];
+  state.selectedService = svc;
+  state.forma = null;
+  state.freq = null;
+
+  // Update list UI
+  document.querySelectorAll('.service-item').forEach(el => el.classList.remove('selected'));
+  const si = document.getElementById('si-' + idx);
+  if (si) { si.classList.add('selected'); si.querySelector('.service-check').textContent = '●'; }
+
+  // Fill auto fields
+  document.getElementById('auto-detail-card').style.display = 'block';
+  setText('av-codLC', svc.codLC);
+  setText('av-nbs', svc.nbs);
+  setText('av-indop', svc.indop);
+  setText('av-codMat', svc.codMaterial || 'A definir');
+  setText('av-ncm', svc.ncmSap);
+  setText('av-divisao', svc.divisao);
+  setText('av-descLC', svc.descLC);
+  setText('av-detalhe', svc.detalhe);
+  setText('av-iss', svc.iss);
+
+  // Retencoes
+  setChip('av-irrf', svc.irrf);
+  setChip('av-csrf', svc.csrf);
+  setChip('av-inss', svc.inss);
+
+  const inssNote = document.getElementById('inss-note');
+  if (svc.inss && svc.inss.toLowerCase().includes('presencial')) {
+    inssNote.textContent = '⚠ ' + svc.inss;
+    inssNote.style.display = 'block';
+  } else {
+    inssNote.style.display = 'none';
+  }
+
+  document.getElementById('btn-next-1').disabled = false;
+
+  // Scroll to detail
+  document.getElementById('auto-detail-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (val && val !== 'N/A' && val !== '') {
+    el.textContent = val;
+    el.classList.remove('empty');
+  } else {
+    el.textContent = 'N/A';
+    el.classList.add('empty');
+  }
+}
+
+function setChip(id, val) {
+  const el = document.getElementById(id);
+  el.textContent = val || 'N/A';
+  el.classList.remove('has-val', 'na');
+  if (!val || val === 'N/A') el.classList.add('na');
+  else el.classList.add('has-val');
+}
+
+// ===== STEP 2 =====
+function populateStep2() {
+  const svc = state.selectedService;
+  document.getElementById('show-divisao').textContent = svc.divisao;
+
+  const opts = svc.formaOpcoes;
+  const container = document.getElementById('forma-options');
+  const alert = document.getElementById('forma-alert');
+
+  if (opts.length === 1) {
+    alert.style.display = 'flex';
+    document.getElementById('forma-restricao').textContent = opts[0];
+  } else {
+    alert.style.display = 'none';
+  }
+
+  container.innerHTML = opts.map(o => `
+    <label class="radio-opt ${state.forma === o ? 'selected' : ''}" onclick="selectForma(this, '${o}')">
+      <input type="radio" name="forma" value="${o}" ${state.forma === o ? 'checked' : ''}>
+      ${o === 'Remota' ? '💻' : o === 'Presencial em Terceiros' ? '🔄' : '🏭'} ${o}
+    </label>
+  `).join('');
+
+  checkStep2();
+}
+
+function selectForma(el, val) {
+  state.forma = val;
+  document.querySelectorAll('#forma-options .radio-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  checkStep2();
+}
+
+function selectFreq(el, val) {
+  state.freq = val;
+  document.querySelectorAll('#freq-options .radio-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  checkStep2();
+}
+
+function checkStep2() {
+  document.getElementById('btn-next-2').disabled = !(state.forma && state.freq);
+}
+
+// ===== STEP 3: MUNICIPALITY AUTOCOMPLETE =====
+function searchMun(q) {
+  const drop = document.getElementById('mun-dropdown');
+  if (q.length < 2) { drop.classList.remove('open'); return; }
+  const ql = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const results = MUNICIPIOS.filter(m => {
+    const mn = m.municipio.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const un = m.uf.toLowerCase();
+    return mn.includes(ql) || un.includes(ql);
+  }).slice(0, 50);
+
+  if (!results.length) { drop.classList.remove('open'); return; }
+
+  drop.innerHTML = results.map((m,i) => {
+    const hi = m.municipio.replace(new RegExp(q, 'gi'), '<strong>$&</strong>');
+    return `<div class="autocomplete-item" onmousedown="selectMun('${m.municipio.replace(/'/g,"\'")}', '${m.uf.replace(/'/g,"\'")}')">
+      ${hi} · <span style="color:var(--text-muted)">${m.uf}</span>
+    </div>`;
+  }).join('');
+  drop.classList.add('open');
+  currentFocusMun = -1;
+}
+
+document.getElementById('mun-search').addEventListener('keydown', (e) => {
+  const items = document.querySelectorAll('#mun-dropdown .autocomplete-item');
+  if (e.key === 'ArrowDown') { currentFocusMun = Math.min(currentFocusMun+1, items.length-1); highlightMun(items); e.preventDefault(); }
+  else if (e.key === 'ArrowUp') { currentFocusMun = Math.max(currentFocusMun-1, 0); highlightMun(items); e.preventDefault(); }
+  else if (e.key === 'Enter' && currentFocusMun >= 0) { items[currentFocusMun].dispatchEvent(new Event('mousedown')); e.preventDefault(); }
+});
+
+function highlightMun(items) {
+  items.forEach((it, i) => it.classList.toggle('focused', i === currentFocusMun));
+  if (items[currentFocusMun]) items[currentFocusMun].scrollIntoView({ block: 'nearest' });
+}
+
+function selectMun(mun, uf) {
+  state.municipio = { municipio: mun, uf: uf };
+  document.getElementById('mun-search').value = mun + ' · ' + uf;
+  document.getElementById('mun-dropdown').classList.remove('open');
+  document.getElementById('mun-selected-display').style.display = 'block';
+  document.getElementById('mun-selected-val').textContent = mun + ' / ' + uf;
+  document.getElementById('btn-next-3').disabled = false;
+}
+
+function closeMun() {
+  document.getElementById('mun-dropdown').classList.remove('open');
+}
+
+// ===== STEP 4: VALOR =====
+function updateValor() {
+  const val = parseFloat(document.getElementById('valor').value);
+  state.valor = isNaN(val) ? null : val;
+  const area = document.getElementById('calc-area');
+  if (!state.selectedService || !state.valor) { area.style.display = 'none'; return; }
+  area.style.display = 'block';
+  const svc = state.selectedService;
+
+  const issPct = parseFloat(svc.iss) / 100;
+  const irrfPct = parseFloat(svc.irrf) / 100 || 0;
+  const csrfPct = parseFloat(svc.csrf) / 100 || 0;
+
+  const iss = val * issPct;
+  const irrf = irrfPct ? val * irrfPct : null;
+  const csrf = csrfPct ? val * csrfPct : null;
+
+  document.getElementById('calc-iss').textContent = 'R$ ' + iss.toFixed(2);
+  document.getElementById('calc-irrf').textContent = irrf ? 'R$ ' + irrf.toFixed(2) : 'N/A';
+  document.getElementById('calc-csrf').textContent = csrf ? 'R$ ' + csrf.toFixed(2) : 'N/A';
+  document.getElementById('calc-total').textContent = 'R$ ' + (val + iss).toFixed(2);
+}
+
+// ===== REVIEW =====
+function buildReview() {
+  const svc = state.selectedService;
+  state.solicitante = document.getElementById('solicitante').value;
+  state.email = document.getElementById('email').value;
+  state.cliente = document.getElementById('cliente').value;
+  state.valor = parseFloat(document.getElementById('valor').value) || null;
+
+  const rows = [
+    { key: 'Serviço Selecionado', val: svc.nome, accent: true },
+    { key: 'Descrição Técnica', val: svc.detalhe },
+    { key: 'Código LC 116/03', val: svc.codLC, accent: true },
+    { key: 'NBS', val: svc.nbs },
+    { key: 'INDOP', val: svc.indop },
+    { key: 'Código Material', val: svc.codMaterial || 'A definir' },
+    { key: 'NCM-SAP', val: svc.ncmSap },
+    { key: 'Divisão / Hierarquia', val: svc.divisao },
+    { key: 'ISS', val: svc.iss, accent: true },
+    { key: 'Descrição LC 116/03', val: svc.descLC },
+    { key: 'Retenção IRRF', val: svc.irrf },
+    { key: 'Retenção CSRF', val: svc.csrf },
+    { key: 'INSS', val: svc.inss },
+    { key: 'Forma de Prestação', val: state.forma },
+    { key: 'Frequência', val: state.freq },
+    { key: 'Local de Prestação', val: state.municipio ? state.municipio.municipio + ' / ' + state.municipio.uf : '–' },
+    { key: 'Valor do Serviço (sem impostos)', val: state.valor ? 'R$ ' + state.valor.toFixed(2) : '–' },
+    { key: 'Solicitante', val: state.solicitante || '–' },
+    { key: 'Cliente', val: state.cliente || '–' },
+    { key: 'E-mail', val: state.email || '–' },
+  ];
+
+  document.getElementById('review-content').innerHTML = `
+    <div class="review-grid">
+      ${rows.map(r => `
+        <div class="review-row">
+          <span class="review-key">${r.key}</span>
+          <span class="review-val${r.accent ? ' accent' : ''}">${r.val || '–'}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ===== PDF GENERATION =====
+function gerarPDF(openMail = false) {
+  const svc = state.selectedService;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+  const ml = 18, mr = 192, mt = 20;
+  let y = mt;
+
+  // Header bar
+  doc.setFillColor(0,90,255);
+  doc.rect(ml, y, mr - ml, 12, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('sans-serif', 'bold');
+  doc.setFontSize(13);
+  doc.text('SICK – CADASTRO DE SERVIÇO / EMISSÃO DE NF', ml + 4, y + 8);
+  y += 18;
+
+  // Meta
+  doc.setTextColor(100, 100, 100);
+  doc.setFont('sans-serif', 'normal');
+  doc.setFontSize(9);
+  const now = new Date();
+  doc.text('Gerado em: ' + now.toLocaleString('pt-BR'), ml, y);
+  if (state.solicitante) doc.text('Solicitante: ' + state.solicitante, mr - 60, y);
+  y += 6;
+  if (state.cliente) {
+    doc.text('Cliente: ' + state.cliente, ml, y);
+    y += 6;
+  }
+  y += 2;
+
+  // Section helper
+  const section = (title) => {
+    doc.setFillColor(245, 244, 240);
+    doc.rect(ml, y, mr - ml, 7, 'F');
+    doc.setFont('sans-serif', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(26, 25, 22);
+    doc.text(title.toUpperCase(), ml + 3, y + 5);
+    y += 10;
+    doc.setFont('sans-serif', 'normal');
+    doc.setFontSize(9);
+  };
+
+  const field = (label, val) => {
+    if (y > 265) { doc.addPage(); y = 20; }
+    doc.setTextColor(120, 120, 110);
+    doc.setFontSize(8);
+    doc.text(label, ml, y);
+    doc.setTextColor(26, 25, 22);
+    doc.setFontSize(10);
+    const lines = doc.splitTextToSize(String(val || '–'), mr - ml - 40);
+    doc.text(lines, ml + 55, y);
+    y += Math.max(6, lines.length * 5);
+  };
+
+  const field2 = (pairs) => {
+    const w = (mr - ml) / 2;
+    pairs.forEach(([l, v], i) => {
+      const x = ml + (i % 2) * w;
+      if (i % 2 === 0 && i > 0) y += 6;
+      doc.setTextColor(120, 120, 110); doc.setFontSize(8); doc.text(l, x, y);
+      doc.setTextColor(26,25,22); doc.setFontSize(10); doc.text(String(v || '–'), x + 28, y);
+    });
+    y += 8;
+  };
+
+  // Service section
+  section('1. Tipo de Serviço');
+  field('Serviço:', svc.nome);
+  field('Descrição:', svc.detalhe);
+  y += 2;
+
+  section('2. Códigos Fiscais (Auto-preenchido)');
+  field2([
+    ['Cód LC 116/03:', svc.codLC],
+    ['NBS:', svc.nbs],
+    ['INDOP:', svc.indop],
+    ['Cód. Material:', svc.codMaterial || 'A definir'],
+  ]);
+  field2([
+    ['NCM-SAP:', svc.ncmSap],
+    ['Divisão:', svc.divisao],
+  ]);
+  field('Desc. LC 116/03:', svc.descLC);
+  y += 2;
+
+  section('3. Impostos e Retenções');
+  // ISS highlight
+  doc.setFillColor(255, 240, 239);
+  doc.rect(ml, y, 55, 10, 'F');
+  doc.setTextColor(184, 26, 22);
+  doc.setFont('sans-serif', 'bold');
+  doc.setFontSize(11);
+  doc.text('ISS: ' + svc.iss, ml + 4, y + 7);
+  y += 14;
+  doc.setFont('sans-serif', 'normal');
+  field2([
+    ['Ret. IRRF:', svc.irrf],
+    ['Ret. CSRF:', svc.csrf],
+  ]);
+  field('INSS:', svc.inss);
+  if (svc.inss && svc.inss.toLowerCase().includes('presencial')) {
+    doc.setTextColor(200, 120, 0);
+    doc.setFontSize(8);
+    doc.text('⚠ ' + svc.inss, ml, y); y += 6;
+  }
+  y += 2;
+
+  section('4. Execução do Serviço');
+  field2([
+    ['Forma:', state.forma || '–'],
+    ['Frequência:', state.freq || '–'],
+  ]);
+  field('Local (Município/UF):', state.municipio ? state.municipio.municipio + ' / ' + state.municipio.uf : '–');
+  y += 2;
+
+  section('5. Valores');
+  if (state.valor) {
+    const issPct = parseFloat(svc.iss) / 100;
+    const iss = state.valor * issPct;
+    field2([
+      ['Valor s/ impostos:', 'R$ ' + state.valor.toFixed(2)],
+      ['ISS estimado:', 'R$ ' + iss.toFixed(2)],
+    ]);
+    field('Total (c/ ISS):', 'R$ ' + (state.valor + iss).toFixed(2));
+  } else {
+    field('Valor:', 'Não informado');
+  }
+  y += 4;
+
+  // Footer
+  doc.setDrawColor(220, 219, 210);
+  doc.line(ml, 280, mr, 280);
+  doc.setTextColor(150, 150, 140);
+  doc.setFontSize(8);
+  doc.text('Documento gerado pelo Sistema de Cadastro de Serviços SICK – uso interno', ml, 285);
+  doc.text('Página 1', mr - 10, 285);
+
+  if (openMail && state.email) {
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const subj = encodeURIComponent('Cadastro de Serviço NF – ' + svc.nome + (state.cliente ? ' – ' + state.cliente : ''));
+    const body = encodeURIComponent('Olá,\n\nSegue em anexo o formulário de cadastro de serviço para emissão de NF.\n\nServiço: ' + svc.nome + '\nLocal: ' + (state.municipio ? state.municipio.municipio + '/' + state.municipio.uf : '–') + '\n\nAtenciosamente.');
+    window.open('mailto:' + state.email + '?subject=' + subj + '&body=' + body, '_blank');
+    doc.save('SICK_Cadastro_Servico.pdf');
+  } else {
+    doc.save('SICK_Cadastro_Servico.pdf');
+  }
+}
+
+function gerarPDFEmail() {
+  gerarPDF(true);
+}
+
+function openSettings() {
+  const modal = document.getElementById('settings-modal');
+  modal.style.display = 'flex';
+  document.getElementById('pa-url-input').value = POWER_AUTOMATE_URL;
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').style.display = 'none';
+}
+
+function saveSettings() {
+  POWER_AUTOMATE_URL = document.getElementById('pa-url-input').value.trim();
+  localStorage.setItem('pa_url', POWER_AUTOMATE_URL);
+  closeSettings();
+  showToast('✓ URL do Power Automate salva!', 'ok');
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast toast-' + type;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 4000);
+}
+
+async function enviarSharePoint() {
+  if (!POWER_AUTOMATE_URL) {
+    showToast('⚠ Configure a URL do Power Automate primeiro (botão ⚙ no cabeçalho)', 'warn');
+    openSettings();
+    return;
+  }
+
+  const svc = state.selectedService;
+  if (!svc) { showToast('Selecione um serviço primeiro.', 'warn'); return; }
+
+  const btn = document.getElementById('btn-sharepoint');
+  btn.disabled = true;
+  btn.textContent = '⏳ Enviando...';
+
+  const issPct = parseFloat(svc.iss) / 100 || 0;
+  const valorNum = parseFloat(document.getElementById('valor').value) || 0;
+  const issVal = valorNum * issPct;
+
+  const payload = {
+    // Identification
+    DataCadastro: new Date().toISOString(),
+    Solicitante: document.getElementById('solicitante').value || '',
+    Cliente: document.getElementById('cliente').value || '',
+    Email: document.getElementById('email').value || '',
+
+    // Service
+    Servico: svc.nome,
+    DescricaoTecnica: svc.detalhe,
+
+    // Fiscal codes (auto-filled)
+    CodigoLC116: svc.codLC,
+    NBS: svc.nbs,
+    INDOP: svc.indop,
+    CodigoMaterial: svc.codMaterial || '',
+    NCM_SAP: svc.ncmSap,
+    Divisao: svc.divisao,
+    DescricaoLC116: svc.descLC,
+
+    // Tax
+    ISS_Percentual: svc.iss,
+    ISS_Valor: issVal ? 'R$ ' + issVal.toFixed(2) : '',
+    Retencao_IRRF: svc.irrf,
+    Retencao_CSRF: svc.csrf,
+    INSS: svc.inss,
+
+    // Execution
+    FormaExecucao: state.forma || '',
+    Frequencia: state.freq || '',
+    Municipio: state.municipio ? state.municipio.municipio : '',
+    UF: state.municipio ? state.municipio.uf : '',
+
+    // Value
+    ValorServico: valorNum ? valorNum.toFixed(2) : '',
+    ValorTotal: valorNum ? (valorNum + issVal).toFixed(2) : '',
+
+    // Status
+    Status: 'Pendente',
+  };
+
+  try {
+    const res = await fetch(POWER_AUTOMATE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok || res.status === 202) {
+      showToast('✓ Cadastro enviado ao SharePoint com sucesso!', 'ok');
+      btn.textContent = '✓ Enviado ao SharePoint';
+      btn.style.background = 'var(--ok)';
+    } else {
+      throw new Error('HTTP ' + res.status);
+    }
+  } catch (err) {
+    showToast('✗ Erro ao enviar: ' + err.message, 'err');
+    btn.disabled = false;
+    btn.textContent = '☁ Enviar ao SharePoint';
+  }
+}
+
+</script>
+
+<!-- SETTINGS MODAL --
+/*<div id="settings-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#fff;max-width:560px;width:90%;border:1px solid var(--border);padding:0;overflow:hidden;">
+    <div style="background:var(--text);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-family:var(--mono);font-size:13px;font-weight:600;">⚙ CONFIGURAÇÃO – POWER AUTOMATE</span>
+      <button onclick="closeSettings()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:18px;">✕</button>
+    </div>
+    <div style="padding:24px;">
+      <div style="background:var(--info-light);border:1px solid #c5d8f0;padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--info);line-height:1.6;">
+        <strong>Como obter a URL:</strong><br>
+        1. Acesse <strong>make.powerautomate.com</strong><br>
+        2. Crie um novo fluxo → <em>Quando uma solicitação HTTP é recebida</em><br>
+        3. Adicione ação → <em>Criar item no SharePoint</em><br>
+        4. Copie a URL HTTP POST gerada e cole abaixo
+      </div>
+      <label style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;">URL do Flow (HTTP POST)</label>
+      <input type="text" id="pa-url-input" placeholder="https://prod-xx.westeurope.logic.azure.com/workflows/..." style="width:100%;padding:10px 12px;border:1px solid var(--border);font-size:13px;margin-bottom:16px;border-radius:0;">
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-primary" onclick="saveSettings()">Salvar URL</button>
+        <button class="btn btn-ghost" onclick="closeSettings()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+>
+<!-- TOAST -->
+<div id="toast" style="display:none;position:fixed;bottom:32px;right:32px;padding:14px 20px;font-family:var(--mono);font-size:13px;z-index:2000;border-left:4px solid;max-width:380px;"></div>
+
+<style>
+.toast-ok { background:#edf7f1; border-color:var(--ok); color:var(--ok); }
+.toast-warn { background:#fff8e6; border-color:var(--warn); color:#7a4c00; }
+.toast-err { background:#fff0ef; border-color:var(--accent); color:var(--accent-dark); }
+</style>
+
+</body>
+</html>
